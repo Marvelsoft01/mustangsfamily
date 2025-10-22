@@ -52,7 +52,7 @@ export const TributeSection = () => {
 
           <div className="pt-8">
             <motion.a
-              href="https://www.linkedin.com"
+              href="https://www.linkedin.com/in/abdulwahab-rahman-dayo-302665178/"
               target="_blank"
               rel="noopener noreferrer"
               whileHover={{ scale: 1.05 }}
