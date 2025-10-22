@@ -1,12 +1,20 @@
 import { motion } from "framer-motion";
 import { useInView } from "framer-motion";
 import { useRef } from "react";
+import gen1 from "@/assets/mustang-gen1.jpg";
+import gen2 from "@/assets/mustang-gen2.jpg";
+import gen3 from "@/assets/mustang-gen3.jpg";
+import gen4 from "@/assets/mustang-gen4.jpg";
+import gen5 from "@/assets/mustang-gen5.jpg";
+import gen6 from "@/assets/mustang-gen6.jpg";
+import gen7 from "@/assets/mustang-gen7.jpg";
 
 interface Era {
   generation: string;
   years: string;
   tagline: string;
   models: string[];
+  image: string;
 }
 
 const eras: Era[] = [
@@ -19,7 +27,8 @@ const eras: Era[] = [
       "1967–68 Shelby GT350 & GT500",
       "1969 Mach 1, Boss 302, Boss 429",
       "1971–73 Mach 1 & Boss 351"
-    ]
+    ],
+    image: gen1
   },
   {
     generation: "Second Generation",
@@ -28,7 +37,8 @@ const eras: Era[] = [
     models: [
       "Mustang II Mach 1",
       "Mustang II King Cobra"
-    ]
+    ],
+    image: gen2
   },
   {
     generation: "Third Generation",
@@ -38,7 +48,8 @@ const eras: Era[] = [
       "Mustang GT",
       "Mustang SVO (Turbocharged 4-cylinder)",
       "1993 Mustang Cobra R"
-    ]
+    ],
+    image: gen3
   },
   {
     generation: "Fourth Generation",
@@ -49,7 +60,8 @@ const eras: Era[] = [
       "2001 Bullitt",
       "2003–04 Mach 1",
       "2003–04 Cobra \"Terminator\""
-    ]
+    ],
+    image: gen4
   },
   {
     generation: "Fifth Generation",
@@ -60,7 +72,8 @@ const eras: Era[] = [
       "2008 Bullitt",
       "2012 Boss 302 Laguna Seca",
       "2013 Shelby GT500"
-    ]
+    ],
+    image: gen5
   },
   {
     generation: "Sixth Generation",
@@ -72,7 +85,8 @@ const eras: Era[] = [
       "Bullitt (2019)",
       "Mach 1 (2021)",
       "Mustang Mach-E (2021–Present)"
-    ]
+    ],
+    image: gen6
   },
   {
     generation: "Seventh Generation",
@@ -83,7 +97,8 @@ const eras: Era[] = [
       "Mustang Dark Horse & Dark Horse Premium",
       "Mustang EcoBoost",
       "Mustang Convertible"
-    ]
+    ],
+    image: gen7
   }
 ];
 
@@ -99,35 +114,46 @@ const EraCard = ({ era, index }: { era: Era; index: number }) => {
       transition={{ duration: 0.8, delay: 0.2 }}
       className="relative"
     >
-      <div className="bg-card border border-border rounded-lg p-8 cinematic-shadow hover:glow-blue transition-all duration-300">
-        <div className="flex items-start justify-between mb-4">
-          <div>
+      <div className="bg-card border border-border rounded-lg overflow-hidden cinematic-shadow hover:glow-blue transition-all duration-300 group">
+        {/* Car Image */}
+        <div className="relative h-64 overflow-hidden">
+          <img 
+            src={era.image} 
+            alt={`${era.generation} Mustang`}
+            className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-card via-transparent to-transparent" />
+          <div className="absolute top-4 right-4 h-12 w-12 rounded-full bg-gradient-accent flex items-center justify-center cinematic-shadow">
+            <span className="text-background font-bold text-lg">{index + 1}</span>
+          </div>
+        </div>
+
+        {/* Content */}
+        <div className="p-8">
+          <div className="mb-4">
             <h3 className="text-3xl font-bold text-gradient-accent mb-2">
               {era.generation}
             </h3>
             <p className="text-xl font-semibold text-metallic">{era.years}</p>
           </div>
-          <div className="h-12 w-12 rounded-full bg-gradient-accent flex items-center justify-center text-background font-bold text-lg">
-            {index + 1}
-          </div>
-        </div>
-        
-        <p className="text-lg italic text-muted-foreground mb-6">
-          "{era.tagline}"
-        </p>
-
-        <div className="space-y-2">
-          <p className="text-sm font-semibold text-metallic uppercase tracking-wide">
-            Key Models:
+          
+          <p className="text-lg italic text-muted-foreground mb-6">
+            "{era.tagline}"
           </p>
-          <ul className="space-y-2">
-            {era.models.map((model, idx) => (
-              <li key={idx} className="text-foreground flex items-start">
-                <span className="text-amber mr-2">▸</span>
-                <span>{model}</span>
-              </li>
-            ))}
-          </ul>
+
+          <div className="space-y-2">
+            <p className="text-sm font-semibold text-metallic uppercase tracking-wide">
+              Key Models:
+            </p>
+            <ul className="space-y-2">
+              {era.models.map((model, idx) => (
+                <li key={idx} className="text-foreground flex items-start">
+                  <span className="text-amber mr-2">▸</span>
+                  <span>{model}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
       </div>
     </motion.div>
