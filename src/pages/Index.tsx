@@ -5,10 +5,12 @@ import { DesignDNA } from "@/components/DesignDNA";
 import { BlogSection } from "@/components/BlogSection";
 import { TributeSection } from "@/components/TributeSection";
 import { Footer } from "@/components/Footer";
+import { ScrollIndicator } from "@/components/ScrollIndicator";
 
 const Index = () => {
   return (
     <main className="min-h-screen">
+      <ScrollIndicator />
       <HeroSection />
       <TimelineSection />
       <SalesShowcase />
