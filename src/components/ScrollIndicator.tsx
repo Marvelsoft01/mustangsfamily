@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { Car, ChevronUp } from "lucide-react";
+import { ChevronUp } from "lucide-react";
+import mustangTopView from "@/assets/mustang-top-view.png";
 
 export const ScrollIndicator = () => {
   const [scrollProgress, setScrollProgress] = useState(0);
@@ -49,36 +50,37 @@ export const ScrollIndicator = () => {
         
         {/* Mustang Icon */}
         <div
-          className="absolute -left-6 -translate-y-1/2 transition-all duration-100 pointer-events-auto cursor-pointer group"
+          className="absolute -left-8 -translate-y-1/2 transition-all duration-100 pointer-events-auto cursor-pointer group"
           style={{ top: `${scrollProgress}%` }}
           onClick={isAtBottom ? scrollToTop : undefined}
         >
           {/* 3D Shadow Effect */}
-          <div className="absolute inset-0 blur-lg bg-destructive/40 rounded-full scale-110 group-hover:scale-125 transition-transform" />
+          <div className="absolute inset-0 blur-xl bg-destructive/50 scale-110 group-hover:scale-125 transition-transform" />
           
-          {/* Mustang Car Icon */}
-          <div className="relative">
-            <Car 
-              className={`w-12 h-12 text-destructive drop-shadow-lg transform transition-all duration-300 ${
+          {/* Mustang Car Image */}
+          <div className="relative w-16 h-16">
+            <img 
+              src={mustangTopView}
+              alt="Mustang"
+              className={`w-full h-full object-contain drop-shadow-2xl transform transition-all duration-300 ${
                 isAtBottom 
                   ? "group-hover:scale-125 group-hover:-translate-y-1 animate-pulse" 
                   : ""
               }`}
-              fill="currentColor"
               style={{
-                filter: "drop-shadow(0 0 8px hsl(var(--destructive)))",
-                transform: `rotateY(${scrollProgress % 2 === 0 ? "0deg" : "5deg"})`
+                filter: "drop-shadow(0 0 12px rgba(239, 68, 68, 0.8)) brightness(1.1) contrast(1.2)",
+                mixBlendMode: "normal"
               }}
             />
             
             {/* Up Arrow when at bottom */}
             {isAtBottom && (
-              <ChevronUp className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-6 h-6 text-white animate-bounce" />
+              <ChevronUp className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 text-white animate-bounce drop-shadow-lg" />
             )}
           </div>
           
           {/* Exhaust Effect */}
-          <div className="absolute -right-2 top-1/2 -translate-y-1/2 w-4 h-1 bg-gradient-to-r from-orange/60 to-transparent rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
+          <div className="absolute -right-3 top-1/2 -translate-y-1/2 w-6 h-2 bg-gradient-to-r from-orange/70 to-transparent rounded-full opacity-0 group-hover:opacity-100 transition-opacity blur-sm" />
         </div>
       </div>
     </div>
