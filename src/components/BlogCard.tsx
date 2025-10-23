@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { BlogPost } from "@/types/blog";
 import { Calendar, Clock } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 interface BlogCardProps {
   post: BlogPost;
@@ -8,13 +9,16 @@ interface BlogCardProps {
 }
 
 export const BlogCard = ({ post, index }: BlogCardProps) => {
+  const navigate = useNavigate();
+
   return (
     <motion.article
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: index * 0.1 }}
       viewport={{ once: true }}
-      className="group bg-card border border-border rounded-lg overflow-hidden hover:shadow-elegant transition-all duration-300"
+      onClick={() => navigate("/blog")}
+      className="group bg-card border border-border rounded-lg overflow-hidden hover:shadow-elegant transition-all duration-300 cursor-pointer"
     >
       <div className="relative h-64 overflow-hidden">
         <img
