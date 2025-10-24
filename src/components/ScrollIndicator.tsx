@@ -5,6 +5,8 @@ import mustangTopView from "@/assets/mustang-top-view.png";
 export const ScrollIndicator = () => {
   const [scrollProgress, setScrollProgress] = useState(0);
   const [isAtBottom, setIsAtBottom] = useState(false);
+  const [rotation, setRotation] = useState(0);
+  const [lastScrollTop, setLastScrollTop] = useState(0);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -15,6 +17,12 @@ export const ScrollIndicator = () => {
       const totalScroll = documentHeight - windowHeight;
       const progress = (scrollTop / totalScroll) * 100;
       
+      // Calculate rotation based on scroll direction
+      const scrollDelta = scrollTop - lastScrollTop;
+      const rotationSpeed = 0.5; // Adjust for rotation sensitivity
+      
+      setRotation(prev => prev + (scrollDelta * rotationSpeed));
+      setLastScrollTop(scrollTop);
       setScrollProgress(Math.min(progress, 100));
       setIsAtBottom(progress >= 95);
     };
@@ -23,7 +31,7 @@ export const ScrollIndicator = () => {
     handleScroll();
     
     return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  }, [lastScrollTop]);
 
   const scrollToTop = () => {
     window.scrollTo({
@@ -62,14 +70,15 @@ export const ScrollIndicator = () => {
             <img 
               src={mustangTopView}
               alt="Mustang"
-              className={`w-full h-full object-contain drop-shadow-2xl transform transition-all duration-300 ${
+              className={`w-full h-full object-contain drop-shadow-2xl transform transition-all duration-100 ${
                 isAtBottom 
                   ? "group-hover:scale-125 group-hover:-translate-y-1 animate-pulse" 
                   : ""
               }`}
               style={{
                 filter: "drop-shadow(0 0 16px rgba(234, 179, 8, 0.9)) drop-shadow(0 0 8px rgba(239, 68, 68, 0.6)) brightness(1.15) contrast(1.1)",
-                mixBlendMode: "normal"
+                mixBlendMode: "normal",
+                transform: `rotate(${rotation}deg)`
               }}
             />
             
