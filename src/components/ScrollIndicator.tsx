@@ -55,10 +55,10 @@ export const ScrollIndicator = () => {
           onClick={isAtBottom ? scrollToTop : undefined}
         >
           {/* 3D Shadow Effect */}
-          <div className="absolute inset-0 blur-xl bg-destructive/50 scale-110 group-hover:scale-125 transition-transform" />
+          <div className="absolute inset-0 blur-xl bg-yellow-500/40 scale-110 group-hover:scale-125 transition-transform" />
           
           {/* Mustang Car Image */}
-          <div className="relative w-16 h-16">
+          <div className="relative w-20 h-20">
             <img 
               src={mustangTopView}
               alt="Mustang"
@@ -68,7 +68,7 @@ export const ScrollIndicator = () => {
                   : ""
               }`}
               style={{
-                filter: "drop-shadow(0 0 12px rgba(239, 68, 68, 0.8)) brightness(1.1) contrast(1.2)",
+                filter: "drop-shadow(0 0 16px rgba(234, 179, 8, 0.9)) drop-shadow(0 0 8px rgba(239, 68, 68, 0.6)) brightness(1.15) contrast(1.1)",
                 mixBlendMode: "normal"
               }}
             />
