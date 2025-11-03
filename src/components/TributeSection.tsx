@@ -45,21 +45,21 @@ export const TributeSection = () => {
           <p className="text-2xl font-light text-foreground leading-relaxed">
             Six decades later, the Mustang still unites dreamers, drivers, and doers.
           </p>
-          
+
           <p className="text-xl text-muted-foreground leading-relaxed">
             This is a fan-made tribute — celebrating the story of power, passion, and progress.
           </p>
 
           <div className="pt-8">
             <motion.a
-              href="https://www.linkedin.com/in/abdulwahab-rahman-dayo-302665178/"
+              href="https://www.linkedin.com/company/marvelsoft-technologies/"
               target="_blank"
               rel="noopener noreferrer"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               className="inline-flex items-center gap-2 px-8 py-4 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-full glow-blue transition-all duration-300"
             >
-              Connect with the Creator
+              Connect with the Creators
               <ExternalLink className="h-5 w-5" />
             </motion.a>
           </div>
