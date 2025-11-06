@@ -1,110 +1,160 @@
 import { BlogPost, BlogCategory, PaginationParams, BlogFilters, BlogListResponse } from "@/types/blog";
-import blogLegendary1 from "@/assets/blog-legendary-1.jpg";
-import blogEngineering1 from "@/assets/blog-engineering-1.jpg";
-import blogCulture1 from "@/assets/blog-culture-1.jpg";
-import blogModern1 from "@/assets/blog-modern-1.jpg";
-
-// Mock data - replace with API calls later
-const mockBlogPosts: BlogPost[] = [
-  {
-    id: "1",
-    title: "The Untold Story of the 1967 Shelby GT500",
-    excerpt: "Discover the engineering marvel that defined an era and set the standard for American muscle cars.",
-    content: "Full article content here...",
-    category: "Legendary Mustangs",
-    image: blogLegendary1,
-    author: "Mustang Historian",
-    publishedAt: "2025-01-15",
-    readTime: "5 min read"
-  },
-  {
-    id: "2",
-    title: "Breaking Down the Coyote V8: Engineering Excellence",
-    excerpt: "A deep dive into the technology that powers the modern Mustang GT - from dual overhead cams to variable valve timing.",
-    content: "Full article content here...",
-    category: "Engineering the Stallion",
-    image: blogEngineering1,
-    author: "Tech Editor",
-    publishedAt: "2025-01-10",
-    readTime: "8 min read"
-  },
-  {
-    id: "3",
-    title: "Mustang Clubs Around the World: A Global Passion",
-    excerpt: "From Tokyo to Paris, see how Mustang enthusiasts are building communities and celebrating the pony car legacy.",
-    content: "Full article content here...",
-    category: "Global Mustang Culture",
-    image: blogCulture1,
-    author: "Community Manager",
-    publishedAt: "2025-01-05",
-    readTime: "6 min read"
-  },
-  {
-    id: "4",
-    title: "Dark Horse: The Future of Performance",
-    excerpt: "Exploring how the 2025 Mustang Dark Horse combines raw power with cutting-edge technology for the next generation.",
-    content: "Full article content here...",
-    category: "Modern Era & Future Tech",
-    image: blogModern1,
-    author: "Performance Analyst",
-    publishedAt: "2025-01-01",
-    readTime: "7 min read"
-  },
-];
+import { apiGet } from "./api";
+import { DjangoPost, DjangoCategory, DjangoPaginatedResponse, DjangoAuthor } from "@/types/django";
 
 /**
- * Fetch blog posts with filtering and pagination
- * TODO: Replace with actual API call when backend is ready
- * Example: return fetch(`/api/blogs?category=${filters.category}&page=${page}&perPage=${perPage}`)
+ * Map Django category to BlogCategory string
+ */
+const mapCategory = (category: DjangoCategory | number): BlogCategory => {
+  if (typeof category === 'number') {
+    return "Mustang Life"; // Default fallback
+  }
+  
+  const categoryMap: Record<string, BlogCategory> = {
+    "legendary-mustangs": "Legendary Mustangs",
+    "engineering-the-stallion": "Engineering the Stallion",
+    "global-mustang-culture": "Global Mustang Culture",
+    "modern-era-future-tech": "Modern Era & Future Tech",
+    "mustang-life": "Mustang Life",
+  };
+  
+  return categoryMap[category.slug] || category.name as BlogCategory;
+};
+
+/**
+ * Map Django post to BlogPost format
+ */
+const mapDjangoPost = (djangoPost: DjangoPost): BlogPost => {
+  const category = typeof djangoPost.category === 'object' 
+    ? djangoPost.category 
+    : { id: djangoPost.category, name: 'Mustang Life', slug: 'mustang-life' };
+    
+  const author = typeof djangoPost.author === 'object'
+    ? djangoPost.author
+    : { id: djangoPost.author, name: 'Anonymous', email: '' };
+
+  return {
+    id: djangoPost.slug || String(djangoPost.id),
+    title: djangoPost.title,
+    excerpt: djangoPost.excerpt,
+    content: djangoPost.content,
+    category: mapCategory(category),
+    image: djangoPost.image || '',
+    author: author.name,
+    publishedAt: djangoPost.published_at,
+    readTime: djangoPost.read_time || '5 min read',
+  };
+};
+
+/**
+ * Fetch blog posts with filtering and pagination from Django API
  */
 export const getBlogPosts = async (
   pagination: PaginationParams,
   filters?: BlogFilters
 ): Promise<BlogListResponse> => {
-  // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 100));
+  try {
+    // Build query parameters
+    const params = new URLSearchParams();
+    params.append('page', String(pagination.page));
+    params.append('page_size', String(pagination.perPage));
+    
+    if (filters?.category) {
+      // Convert category name to slug for Django
+      const categorySlug = filters.category.toLowerCase().replace(/\s+/g, '-').replace(/&/g, '');
+      params.append('category', categorySlug);
+    }
 
-  let filteredPosts = [...mockBlogPosts];
+    const response = await apiGet<DjangoPaginatedResponse<DjangoPost>>(
+      `/posts/?${params.toString()}`
+    );
 
-  // Apply category filter
-  if (filters?.category) {
-    filteredPosts = filteredPosts.filter(post => post.category === filters.category);
+    const posts = response.results.map(mapDjangoPost);
+    const totalPages = Math.ceil(response.count / pagination.perPage);
+
+    return {
+      posts,
+      total: response.count,
+      currentPage: pagination.page,
+      totalPages,
+    };
+  } catch (error) {
+    console.error('Error fetching blog posts:', error);
+    // Return empty result on error
+    return {
+      posts: [],
+      total: 0,
+      currentPage: 1,
+      totalPages: 0,
+    };
   }
-
-  // Calculate pagination
-  const total = filteredPosts.length;
-  const totalPages = Math.ceil(total / pagination.perPage);
-  const start = (pagination.page - 1) * pagination.perPage;
-  const end = start + pagination.perPage;
-  const posts = filteredPosts.slice(start, end);
-
-  return {
-    posts,
-    total,
-    currentPage: pagination.page,
-    totalPages
-  };
 };
 
 /**
- * Get all available blog categories
- * TODO: Replace with API call when backend is ready
+ * Get all available blog categories from Django API
  */
 export const getBlogCategories = async (): Promise<BlogCategory[]> => {
-  return [
-    "Legendary Mustangs",
-    "Engineering the Stallion",
-    "Global Mustang Culture",
-    "Modern Era & Future Tech",
-    "Mustang Life"
-  ];
+  try {
+    const categories = await apiGet<DjangoCategory[]>('/categories/');
+    return categories.map(cat => mapCategory(cat));
+  } catch (error) {
+    console.error('Error fetching categories:', error);
+    // Return default categories on error
+    return [
+      "Legendary Mustangs",
+      "Engineering the Stallion",
+      "Global Mustang Culture",
+      "Modern Era & Future Tech",
+      "Mustang Life"
+    ];
+  }
 };
 
 /**
- * Get a single blog post by ID
- * TODO: Replace with API call when backend is ready
+ * Get a single blog post by slug from Django API
  */
-export const getBlogPost = async (id: string): Promise<BlogPost | null> => {
-  await new Promise(resolve => setTimeout(resolve, 100));
-  return mockBlogPosts.find(post => post.id === id) || null;
+export const getBlogPost = async (slug: string): Promise<BlogPost | null> => {
+  try {
+    const djangoPost = await apiGet<DjangoPost>(`/posts/${slug}/`);
+    return mapDjangoPost(djangoPost);
+  } catch (error) {
+    console.error(`Error fetching blog post ${slug}:`, error);
+    return null;
+  }
+};
+
+/**
+ * Get authors from Django API
+ */
+export const getAuthors = async (): Promise<DjangoAuthor[]> => {
+  try {
+    return await apiGet<DjangoAuthor[]>('/authors/');
+  } catch (error) {
+    console.error('Error fetching authors:', error);
+    return [];
+  }
+};
+
+/**
+ * Submit a comment to Django API
+ */
+export const submitComment = async (
+  postId: string,
+  authorName: string,
+  authorEmail: string,
+  content: string
+): Promise<boolean> => {
+  try {
+    const { apiPost } = await import('./api');
+    await apiPost('/comments/', {
+      post: postId,
+      author_name: authorName,
+      author_email: authorEmail,
+      content,
+    });
+    return true;
+  } catch (error) {
+    console.error('Error submitting comment:', error);
+    return false;
+  }
 };
