@@ -3,7 +3,16 @@
  * Base configuration and helper methods for API calls
  */
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000/api';
+const API_BASE_URL = (() => {
+  const envUrl = import.meta.env.VITE_API_URL as string | undefined;
+  if (envUrl) return envUrl.replace(/\/$/, '');
+  if (typeof window !== 'undefined') {
+    const host = window.location.hostname;
+    const isLocal = /^(localhost|127\.0\.0\.1)$/.test(host);
+    return isLocal ? 'http://127.0.0.1:8000/api' : `${window.location.origin}/api`;
+  }
+  return 'http://127.0.0.1:8000/api';
+})();
 
 interface ApiError {
   message: string;
