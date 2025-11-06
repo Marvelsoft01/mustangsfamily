@@ -14,7 +14,7 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 
-const POSTS_PER_PAGE = 6;
+const POSTS_PER_PAGE = 9;
 
 export const BlogSection = () => {
   const [selectedCategory, setSelectedCategory] = useState<BlogCategory | "All">("All");

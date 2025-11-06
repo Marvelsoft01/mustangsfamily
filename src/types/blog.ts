@@ -24,6 +24,7 @@ export interface PaginationParams {
 
 export interface BlogFilters {
   category?: BlogCategory;
+  search?: string;
 }
 
 export interface BlogListResponse {

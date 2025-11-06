@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { BlogCard } from "@/components/BlogCard";
-import { getBlogPosts, getBlogCategories } from "@/services/blogService";
+import { getBlogPosts, getBlogCategories, searchBlogPosts } from "@/services/blogService";
 import { BlogPost, BlogCategory } from "@/types/blog";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -14,8 +14,9 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { useNavigate } from "react-router-dom";
 
 export default function Blog() {
@@ -26,7 +27,9 @@ export default function Blog() {
   const [totalPages, setTotalPages] = useState(1);
   const [categories, setCategories] = useState<BlogCategory[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const postsPerPage = 6;
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isSearching, setIsSearching] = useState(false);
+  const postsPerPage = 9;
 
   useEffect(() => {
     loadCategories();
@@ -35,6 +38,19 @@ export default function Blog() {
   useEffect(() => {
     loadPosts();
   }, [selectedCategory, currentPage]);
+
+  useEffect(() => {
+    const delaySearch = setTimeout(() => {
+      if (searchQuery) {
+        handleSearch();
+      } else if (isSearching) {
+        setIsSearching(false);
+        loadPosts();
+      }
+    }, 500);
+
+    return () => clearTimeout(delaySearch);
+  }, [searchQuery]);
 
   const loadCategories = async () => {
     const fetchedCategories = await getBlogCategories();
@@ -52,9 +68,28 @@ export default function Blog() {
     setIsLoading(false);
   };
 
+  const handleSearch = async () => {
+    if (!searchQuery.trim()) return;
+    
+    setIsSearching(true);
+    setIsLoading(true);
+    setSelectedCategory("All");
+    
+    const response = await searchBlogPosts(searchQuery, {
+      page: currentPage,
+      perPage: postsPerPage,
+    });
+    
+    setPosts(response.posts);
+    setTotalPages(response.totalPages);
+    setIsLoading(false);
+  };
+
   const handleCategoryChange = (category: BlogCategory | "All") => {
     setSelectedCategory(category);
     setCurrentPage(1);
+    setSearchQuery("");
+    setIsSearching(false);
   };
 
   const handlePageChange = (page: number) => {
@@ -160,6 +195,30 @@ export default function Blog() {
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-12">
+        {/* Search Bar */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="mb-8 max-w-xl mx-auto"
+        >
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5" />
+            <Input
+              type="text"
+              placeholder="Search articles..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10 pr-4 py-6 text-lg"
+            />
+          </div>
+          {isSearching && (
+            <p className="text-sm text-muted-foreground mt-2 text-center">
+              Searching for: <span className="font-semibold">{searchQuery}</span>
+            </p>
+          )}
+        </motion.div>
+
         {/* Category Filters */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -184,7 +243,7 @@ export default function Blog() {
         {/* Blog Posts Grid */}
         {isLoading ? (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
-            {[...Array(6)].map((_, i) => (
+            {[...Array(9)].map((_, i) => (
               <div key={i} className="space-y-4">
                 <Skeleton className="h-64 w-full rounded-xl" />
                 <Skeleton className="h-4 w-3/4" />
@@ -193,7 +252,7 @@ export default function Blog() {
               </div>
             ))}
           </div>
-        ) : (
+        ) : posts.length > 0 ? (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -204,6 +263,14 @@ export default function Blog() {
               <BlogCard key={post.id} post={post} index={index} />
             ))}
           </motion.div>
+        ) : (
+          <div className="text-center py-16">
+            <p className="text-muted-foreground text-lg">
+              {isSearching 
+                ? `No results found for "${searchQuery}"`
+                : "No articles found in this category yet. Check back soon!"}
+            </p>
+          </div>
         )}
 
         {/* Pagination */}

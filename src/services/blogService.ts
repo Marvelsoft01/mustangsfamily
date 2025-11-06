@@ -1,6 +1,6 @@
 import { BlogPost, BlogCategory, PaginationParams, BlogFilters, BlogListResponse } from "@/types/blog";
-import { apiGet } from "./api";
-import { DjangoPost, DjangoCategory, DjangoPaginatedResponse, DjangoAuthor } from "@/types/django";
+import { apiGet, apiPost } from "./api";
+import { DjangoPost, DjangoCategory, DjangoPaginatedResponse, DjangoAuthor, DjangoSiteSettings } from "@/types/django";
 
 /**
  * Map Django category to BlogCategory string
@@ -65,6 +65,10 @@ export const getBlogPosts = async (
       params.append('category', categorySlug);
     }
 
+    if (filters?.search) {
+      params.append('q', filters.search);
+    }
+
     const response = await apiGet<DjangoPaginatedResponse<DjangoPost>>(
       `/posts/?${params.toString()}`
     );
@@ -81,6 +85,43 @@ export const getBlogPosts = async (
   } catch (error) {
     console.error('Error fetching blog posts:', error);
     // Return empty result on error
+    return {
+      posts: [],
+      total: 0,
+      currentPage: 1,
+      totalPages: 0,
+    };
+  }
+};
+
+/**
+ * Search blog posts
+ */
+export const searchBlogPosts = async (
+  query: string,
+  pagination: PaginationParams
+): Promise<BlogListResponse> => {
+  try {
+    const params = new URLSearchParams();
+    params.append('q', query);
+    params.append('page', String(pagination.page));
+    params.append('page_size', String(pagination.perPage));
+
+    const response = await apiGet<DjangoPaginatedResponse<DjangoPost>>(
+      `/posts/search/?${params.toString()}`
+    );
+
+    const posts = response.results.map(mapDjangoPost);
+    const totalPages = Math.ceil(response.count / pagination.perPage);
+
+    return {
+      posts,
+      total: response.count,
+      currentPage: pagination.page,
+      totalPages,
+    };
+  } catch (error) {
+    console.error('Error searching blog posts:', error);
     return {
       posts: [],
       total: 0,
@@ -136,6 +177,126 @@ export const getAuthors = async (): Promise<DjangoAuthor[]> => {
 };
 
 /**
+ * Get posts by category slug
+ */
+export const getPostsByCategory = async (
+  categorySlug: string,
+  pagination: PaginationParams
+): Promise<BlogListResponse> => {
+  try {
+    const params = new URLSearchParams();
+    params.append('page', String(pagination.page));
+    params.append('page_size', String(pagination.perPage));
+
+    const response = await apiGet<DjangoPaginatedResponse<DjangoPost>>(
+      `/posts/category/${categorySlug}/?${params.toString()}`
+    );
+
+    const posts = response.results.map(mapDjangoPost);
+    const totalPages = Math.ceil(response.count / pagination.perPage);
+
+    return {
+      posts,
+      total: response.count,
+      currentPage: pagination.page,
+      totalPages,
+    };
+  } catch (error) {
+    console.error(`Error fetching posts for category ${categorySlug}:`, error);
+    return {
+      posts: [],
+      total: 0,
+      currentPage: 1,
+      totalPages: 0,
+    };
+  }
+};
+
+/**
+ * Get posts by tag slug
+ */
+export const getPostsByTag = async (
+  tagSlug: string,
+  pagination: PaginationParams
+): Promise<BlogListResponse> => {
+  try {
+    const params = new URLSearchParams();
+    params.append('page', String(pagination.page));
+    params.append('page_size', String(pagination.perPage));
+
+    const response = await apiGet<DjangoPaginatedResponse<DjangoPost>>(
+      `/posts/tag/${tagSlug}/?${params.toString()}`
+    );
+
+    const posts = response.results.map(mapDjangoPost);
+    const totalPages = Math.ceil(response.count / pagination.perPage);
+
+    return {
+      posts,
+      total: response.count,
+      currentPage: pagination.page,
+      totalPages,
+    };
+  } catch (error) {
+    console.error(`Error fetching posts for tag ${tagSlug}:`, error);
+    return {
+      posts: [],
+      total: 0,
+      currentPage: 1,
+      totalPages: 0,
+    };
+  }
+};
+
+/**
+ * Get posts by author ID
+ */
+export const getPostsByAuthor = async (
+  authorId: number,
+  pagination: PaginationParams
+): Promise<BlogListResponse> => {
+  try {
+    const params = new URLSearchParams();
+    params.append('page', String(pagination.page));
+    params.append('page_size', String(pagination.perPage));
+
+    const response = await apiGet<DjangoPaginatedResponse<DjangoPost>>(
+      `/posts/author/${authorId}/?${params.toString()}`
+    );
+
+    const posts = response.results.map(mapDjangoPost);
+    const totalPages = Math.ceil(response.count / pagination.perPage);
+
+    return {
+      posts,
+      total: response.count,
+      currentPage: pagination.page,
+      totalPages,
+    };
+  } catch (error) {
+    console.error(`Error fetching posts for author ${authorId}:`, error);
+    return {
+      posts: [],
+      total: 0,
+      currentPage: 1,
+      totalPages: 0,
+    };
+  }
+};
+
+/**
+ * Get comments for a post
+ */
+export const getComments = async (postId: number) => {
+  try {
+    return await apiGet<any[]>(`/comments/${postId}/`);
+  } catch (error) {
+    console.error('Error fetching comments:', error);
+    return [];
+  }
+};
+
+/**
  * Submit a comment to Django API
  */
 export const submitComment = async (
@@ -145,7 +306,6 @@ export const submitComment = async (
   content: string
 ): Promise<boolean> => {
   try {
-    const { apiPost } = await import('./api');
     await apiPost('/comments/', {
       post: postId,
       author_name: authorName,
@@ -156,5 +316,17 @@ export const submitComment = async (
   } catch (error) {
     console.error('Error submitting comment:', error);
     return false;
+  }
+};
+
+/**
+ * Get site settings
+ */
+export const getSiteSettings = async (): Promise<DjangoSiteSettings | null> => {
+  try {
+    return await apiGet<DjangoSiteSettings>('/site/');
+  } catch (error) {
+    console.error('Error fetching site settings:', error);
+    return null;
   }
 };
