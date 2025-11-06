@@ -11,6 +11,7 @@ const mapCategory = (category: DjangoCategory | number): BlogCategory => {
   }
   
   const categoryMap: Record<string, BlogCategory> = {
+    "legendary-mustang": "Legendary Mustangs",
     "legendary-mustangs": "Legendary Mustangs",
     "engineering-the-stallion": "Engineering the Stallion",
     "global-mustang-culture": "Global Mustang Culture",
