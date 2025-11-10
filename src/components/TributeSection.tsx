@@ -52,14 +52,14 @@ export const TributeSection = () => {
 
           <div className="pt-8">
             <motion.a
-              href="https://www.linkedin.com/company/marvelsoft-technologies/"
+              href="https://www.linkedin.com/in/abdulwahab-rahman-dayo-302665178"
               target="_blank"
               rel="noopener noreferrer"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               className="inline-flex items-center gap-2 px-8 py-4 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-full glow-blue transition-all duration-300"
             >
-              Connect with the Creators
+              Connect with the Creator
               <ExternalLink className="h-5 w-5" />
             </motion.a>
           </div>
