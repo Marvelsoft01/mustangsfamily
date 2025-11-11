@@ -70,12 +70,23 @@ export const getBlogPosts = async (
       params.append('q', filters.search);
     }
 
-    const response = await apiGet<DjangoPaginatedResponse<DjangoPost>>(
+    const response = await apiGet<DjangoPaginatedResponse<DjangoPost> | DjangoPost[]>(
       `/posts/?${params.toString()}`
     );
 
-    // Validate response structure
-    if (!response || !response.results || !Array.isArray(response.results)) {
+    // Handle both direct array and paginated response
+    let posts: BlogPost[];
+    let total: number;
+    
+    if (Array.isArray(response)) {
+      // Direct array response
+      posts = response.map(mapDjangoPost);
+      total = posts.length;
+    } else if (response && response.results && Array.isArray(response.results)) {
+      // Paginated response
+      posts = response.results.map(mapDjangoPost);
+      total = response.count;
+    } else {
       console.error('Invalid response structure:', response);
       return {
         posts: [],
@@ -85,12 +96,11 @@ export const getBlogPosts = async (
       };
     }
 
-    const posts = response.results.map(mapDjangoPost);
-    const totalPages = Math.ceil(response.count / pagination.perPage);
+    const totalPages = Math.ceil(total / pagination.perPage);
 
     return {
       posts,
-      total: response.count,
+      total,
       currentPage: pagination.page,
       totalPages,
     };
