@@ -74,6 +74,17 @@ export const getBlogPosts = async (
       `/posts/?${params.toString()}`
     );
 
+    // Validate response structure
+    if (!response || !response.results || !Array.isArray(response.results)) {
+      console.error('Invalid response structure:', response);
+      return {
+        posts: [],
+        total: 0,
+        currentPage: 1,
+        totalPages: 0,
+      };
+    }
+
     const posts = response.results.map(mapDjangoPost);
     const totalPages = Math.ceil(response.count / pagination.perPage);
 
@@ -111,6 +122,17 @@ export const searchBlogPosts = async (
     const response = await apiGet<DjangoPaginatedResponse<DjangoPost>>(
       `/posts/search/?${params.toString()}`
     );
+
+    // Validate response structure
+    if (!response || !response.results || !Array.isArray(response.results)) {
+      console.error('Invalid search response structure:', response);
+      return {
+        posts: [],
+        total: 0,
+        currentPage: 1,
+        totalPages: 0,
+      };
+    }
 
     const posts = response.results.map(mapDjangoPost);
     const totalPages = Math.ceil(response.count / pagination.perPage);
@@ -193,6 +215,17 @@ export const getPostsByCategory = async (
       `/posts/category/${categorySlug}/?${params.toString()}`
     );
 
+    // Validate response structure
+    if (!response || !response.results || !Array.isArray(response.results)) {
+      console.error('Invalid category response structure:', response);
+      return {
+        posts: [],
+        total: 0,
+        currentPage: 1,
+        totalPages: 0,
+      };
+    }
+
     const posts = response.results.map(mapDjangoPost);
     const totalPages = Math.ceil(response.count / pagination.perPage);
 
@@ -229,6 +262,17 @@ export const getPostsByTag = async (
       `/posts/tag/${tagSlug}/?${params.toString()}`
     );
 
+    // Validate response structure
+    if (!response || !response.results || !Array.isArray(response.results)) {
+      console.error('Invalid tag response structure:', response);
+      return {
+        posts: [],
+        total: 0,
+        currentPage: 1,
+        totalPages: 0,
+      };
+    }
+
     const posts = response.results.map(mapDjangoPost);
     const totalPages = Math.ceil(response.count / pagination.perPage);
 
@@ -264,6 +308,17 @@ export const getPostsByAuthor = async (
     const response = await apiGet<DjangoPaginatedResponse<DjangoPost>>(
       `/posts/author/${authorId}/?${params.toString()}`
     );
+
+    // Validate response structure
+    if (!response || !response.results || !Array.isArray(response.results)) {
+      console.error('Invalid author response structure:', response);
+      return {
+        posts: [],
+        total: 0,
+        currentPage: 1,
+        totalPages: 0,
+      };
+    }
 
     const posts = response.results.map(mapDjangoPost);
     const totalPages = Math.ceil(response.count / pagination.perPage);
